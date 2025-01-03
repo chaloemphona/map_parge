@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>map location</title>
+    <link rel="icon" href="D:\map\map01.png" type="image/png">
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" />
+    <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+    <style>
+        #map {
+            height: 700px;    /*600px*/
+            width: 100%;
+            position: relative;
+        }
+
+        .custom-popup {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5); 
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            -webkit-backdrop-filter: blur(10px); 
+            backdrop-filter: blur(10px);
+            padding: 10px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .custom-popup strong {
+            color: #ff8a1d;
+        }
+
+        h1 {
+            font-family: "Georgia", serif;
+            color: #e74141;
+            text-align: center;
+            margin-top: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+
+        .layer-button {
+            position: absolute;
+            top: 2px;
+            left: 10px;
+            background-color: #ffc756;
+            color: rgb(246, 239, 204);
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .layer-button:hover {
+            background-color: #ff3c01;
+        }
+
+        .layer-button-top {
+            top: 10px; 
+        }
+
+        .layer-button-bottom {
+            top: 60px; 
+        }
+
+        .layer-box {
+            position: absolute;
+            top: 10px;
+            left: -330px;
+            width: 300px;
+            height: 650px;
+            background-color: rgba(255, 255, 255, 0.1); 
+            border: 1px solid #ffffff; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+            display: flex;
+            align-items: center; 
+            justify-content: center;
+            padding: 10px; 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px); 
+            z-index: 1000;
+            transition: left 0.3s ease-in-out;
+        }
+
+        .layer-box.show {
+            left: 75px;
+        }
+
+        .layer-box p {
+            font-family: 'Georgia', serif; 
+            font-size: 18px; 
+            margin: 0; 
+            text-align: center; 
+        }
+
+        .checkbox-box {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 300px;
+            background-color: rgba(255, 251, 208, 0.2); 
+            border: 1px solid #ffffff;
+            border-radius: 8px;
+            padding: 10px;
+            display: none;
+            z-index: 1000;
+            backdrop-filter: blur(10px); 
+        }
+
+        .checkbox-box.show {
+            display: block;
+            left: 75px;
+        }
+
+        .checkbox-box label {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        
+
+    </style>
+</head>
+<body>
+    <!-- <h1>
+        <img 
+        src="file:///C:/Users/Areeya%20Bunma/Desktop/pandas/risk2.png" 
+        alt="Risk Image" 
+        style="width: 600px; height: auto; vertical-align: middle; margin-right: 10px;">
+    </h1> -->
+    <div id="map">
+
+        <button class="layer-button layer-button-bottom" onclick="toggleLayerBox()">
+            <img src="https://cdn-icons-png.flaticon.com/128/1975/1975643.png" alt="Layer Box" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 5px;">
+        </button>
+        <button class="layer-button layer-button-top" onclick="toggleCheckboxBox()">
+            <img src="https://cdn-icons-png.flaticon.com/128/3861/3861399.png" alt="Toggle Markers" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 5px;">
+        </button>
+        <div id="checkboxBox" class="checkbox-box">
+            <!-- <label><input type="checkbox" id="toggleMarkersCheckbox" onchange="handleMarkerToggle(this.checked)">กรุงเทพฯ</label> -->
+            <!-- <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="H3handlePolygonToggle(this.checked)">H3 อย่าเปิด</label> -->
+            <!-- <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="handleGithubToggle(this.checked)">github</label> -->
+            <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="NaKhorMarkerToggle(this.checked)">นครปฐม</label>
+            <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="KTMMarkerToggle(this.checked)">กทม</label>
+            <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="H3HhandlePolygonToggle(this.checked)">H3 เเบบเร็ว</label>
+            <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="prakanMarkerToggle(this.checked)">จุด 1 เเสน</label>
+        </div>
+        
+        
+        <div id="layerBox" class="layer-box">
+            <p>
+                เนื้อ 
+                <br>
+                จะใส่อะไร จะดาต้า กราฟ ดีเทล ต่างๆ
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: 'https://vallaris.dragonfly.gistda.or.th/core/api/styles/1.0-beta/styles/6763ee9cb14919ee7e1bc6eb?api_key=TWVBTM9cv3Vpc9QUDEfkopwv5HfVrt9f0pS1gnmSRgAeQoMSlDeRCDUUwZ02L7XS',
+            center: [100.5018, 13.7563],
+            zoom: 7,
+            controls: { zoom: true }
+        });
+
+        // map.addControl(new maplibregl.NavigationControl());
+
+        // if (navigator.geolocation) {
+        //         navigator.geolocation.getCurrentPosition(function(position) {
+        //             const userLongitude = position.coords.longitude;
+        //             const userLatitude = position.coords.latitude;
+
+        //             map.setCenter([userLongitude, userLatitude]);
+        //             map.setZoom(15);
+
+        //             new maplibregl.Marker()
+        //                 .setLngLat([userLongitude, userLatitude])
+        //                 .addTo(map)
+        //                 .setPopup(new maplibregl.Popup({ className: 'custom-popup' })
+        //                     .setHTML("ฉันอยู่ที่นี้"));
+        //         }, function(error) {
+        //             alert("ไม่สามารถรับตำแหน่งของคุณได้: " + error.message);
+        //         }, {
+        //             enableHighAccuracy: true,  // เปิดใช้งานการคำนวณที่แม่นยำ
+        //             timeout: 5000,             // กำหนดเวลาในการรอ (5 วินาที)
+        //             maximumAge: 0              // ห้ามใช้ข้อมูลตำแหน่งที่มีอายุมากกว่า
+        //         });
+        //     } else {
+        //         alert("Geolocation ไม่รองรับในเบราว์เซอร์ของคุณ");
+        //     }
+
+
+
+
+
+
+
+
+
+
+
+
+        //point กทม 
+            let KTMMarkersLayerId = "KTM-markers-layer";
+            let KTMMarkersSourceId = "KTM-markers-source";
+            let KTMMarkersVisible = false;
+
+            function toggleMarkers() {
+                KTMMarkersVisible = !KTMMarkersVisible;
+                const layer = map.getLayer(KTMMarkersLayerId);
+                if (layer) {
+                    map.setLayoutProperty(KTMMarkersLayerId, 'visibility', KTMMarkersVisible ? 'visible' : 'none');
+                }
+            }
+
+            function fetchAndDisplayKTMMarkers() {
+                fetch('http://192.168.10.166:8000/api/v1/duckDBs/places/th/region?region=bangkok')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.data && data.data.type === "FeatureCollection" && Array.isArray(data.data.features)) {
+                            const combinedGeoJSON = {
+                                type: "FeatureCollection",
+                                features: data.data.features.map(feature => ({
+                                    type: "Feature",
+                                    geometry: feature.geometry,
+                                    properties: {
+                                        name: feature.properties.name || '-',
+                                        region: feature.properties.region || '-',
+                                        country: feature.properties.country || '-'
+                                    }
+                                }))
+                            };
+
+                            // Check if source already exists
+                            if (map.getSource(KTMMarkersSourceId)) {
+                                map.getSource(KTMMarkersSourceId).setData(combinedGeoJSON);
+                            } else {
+                                // Add GeoJSON source
+                                map.addSource(KTMMarkersSourceId, {
+                                    type: "geojson",
+                                    data: combinedGeoJSON
+                                });
+
+                                // Add layer for markers
+                                map.addLayer({
+                                    id: KTMMarkersLayerId,
+                                    type: "circle",
+                                    source: KTMMarkersSourceId,
+                                    paint: {
+                                        "circle-radius": 4, //ขนาด
+                                        "circle-color": "#FF0000", //สีจุด
+                                        "circle-stroke-color": "#FF0000", //สีของออร่า
+                                        "circle-stroke-width": 2, //ความกลม
+                                        "circle-blur": 0.8 //ระดับการฟุ้ง
+                                    },
+                                    layout: {
+                                        visibility: 'none'
+                                    }
+                                });
+
+                                map.on("click", KTMMarkersLayerId, e => {
+                                    const properties = e.features[0].properties;
+                                    const coordinates = e.features[0].geometry.coordinates.slice();
+
+                                    // สร้างองค์ประกอบ HTML สำหรับป๊อปอัพ
+                                    const popupContent = document.createElement('div');
+                                    popupContent.className = 'custom-popup';
+                                    popupContent.innerHTML = `
+                                        <strong>ชื่อสถานที่:</strong> ${properties.name}<br>
+                                        <strong>จังหวัด:</strong> ${properties.region}<br>
+                                        <strong>ประเทศ:</strong> ${properties.country}
+                                    `;
+
+                                    new maplibregl.Popup()
+                                        .setLngLat(coordinates)
+                                        .setDOMContent(popupContent)
+                                        .addTo(map);
+                                });
+
+                                map.on('zoom', () => {
+                                    const currentZoom = map.getZoom();
+                                    const visibility = currentZoom > 10 ? 'visible' : 'none';
+                                    map.setLayoutProperty(KTMMarkersLayerId, 'visibility', visibility);
+                                });
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error fetching markers:', error));
+            }
+
+            function clearKTMMarkers() {
+                if (map.getLayer(KTMMarkersLayerId)) {
+                    map.removeLayer(KTMMarkersLayerId);
+                }
+                if (map.getSource(KTMMarkersSourceId)) {
+                    map.removeSource(KTMMarkersSourceId);
+                }
+            }
+            function KTMMarkerToggle(isChecked) {
+                if (isChecked) {
+                    fetchAndDisplayKTMMarkers();
+                } else {
+                    clearKTMMarkers();
+                }
+            }
+
+
+
+
+
+
+
+        //point นครปฐม
+            let NaKhorMarkersLayerId = "NaKhor-markers-layer";
+            let NaKhorMarkersSourceId = "NaKhor-markers-source";
+            let NaKhorMarkersVisible = false;
+
+            function toggleMarkers() {
+                NaKhorMarkersVisible = !NaKhorMarkersVisible;
+                const layer = map.getLayer(NaKhorMarkersLayerId);
+                if (layer) {
+                    map.setLayoutProperty(NaKhorMarkersLayerId, 'visibility', NaKhorMarkersVisible ? 'visible' : 'none');
+                }
+            }
+
+            function fetchAndDisplayNaKhorMarkers() {
+                fetch('http://192.168.10.166:8000/api/v1/duckDBs/places/th/region?region=Nakhon Pathom')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.data && data.data.type === "FeatureCollection" && Array.isArray(data.data.features)) {
+                            const combinedGeoJSON = {
+                                type: "FeatureCollection",
+                                features: data.data.features.map(feature => ({
+                                    type: "Feature",
+                                    geometry: feature.geometry,
+                                    properties: {
+                                        name: feature.properties.name || '-',
+                                        region: feature.properties.region || '-',
+                                        country: feature.properties.country || '-'
+                                    }
+                                }))
+                            };
+
+                            // Check if source already exists
+                            if (map.getSource(NaKhorMarkersSourceId)) {
+                                map.getSource(NaKhorMarkersSourceId).setData(combinedGeoJSON);
+                            } else {
+                                // Add GeoJSON source
+                                map.addSource(NaKhorMarkersSourceId, {
+                                    type: "geojson",
+                                    data: combinedGeoJSON
+                                });
+
+                                // Add layer for markers
+                                map.addLayer({
+                                    id: NaKhorMarkersLayerId,
+                                    type: "circle",
+                                    source: NaKhorMarkersSourceId,
+                                    paint: {
+                                        "circle-radius": 4, //ขนาด
+                                        "circle-color": "#63a6ff", //สีจุด
+                                        "circle-stroke-color": "#63a6ff", //สีของออร่า
+                                        "circle-stroke-width": 2, //ความกลม
+                                        "circle-blur": 0.8 //ระดับการฟุ้ง
+                                    },
+                                    layout: {
+                                        visibility: 'none'
+                                    }
+                                });
+
+                                map.on("click", NaKhorMarkersLayerId, e => {
+                                    const properties = e.features[0].properties;
+                                    const coordinates = e.features[0].geometry.coordinates.slice();
+
+                                    const popupContent = document.createElement('div');
+                                    popupContent.className = 'custom-popup';
+                                    popupContent.innerHTML = `
+                                        <strong>ชื่อสถานที่:</strong> ${properties.name}<br>
+                                        <strong>จังหวัด:</strong> ${properties.region}<br>
+                                        <strong>ประเทศ:</strong> ${properties.country}
+                                    `;
+
+                                    new maplibregl.Popup()
+                                        .setLngLat(coordinates)
+                                        .setDOMContent(popupContent)
+                                        .addTo(map);
+                                });
+
+                                map.on('zoom', () => {
+                                    const currentZoom = map.getZoom();
+                                    const visibility = currentZoom > 10 ? 'visible' : 'none';
+                                    map.setLayoutProperty(NaKhorMarkersLayerId, 'visibility', visibility);
+                                });
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error fetching markers:', error));
+            }
+
+            function clearNaKhorMarkers() {
+                if (map.getLayer(NaKhorMarkersLayerId)) {
+                    map.removeLayer(NaKhorMarkersLayerId);
+                }
+                if (map.getSource(NaKhorMarkersSourceId)) {
+                    map.removeSource(NaKhorMarkersSourceId);
+                }
+            }
+            function NaKhorMarkerToggle(isChecked) {
+                if (isChecked) {
+                    fetchAndDisplayNaKhorMarkers();
+                } else {
+                    clearNaKhorMarkers();
+                }
+            }
+
+
+
+
+
+
+
+
+
+//point fast 100,000   ลิมิต
+            let prakanMarkersLayerId = "prakan-markers-layer";
+            let prakanMarkersSourceId = "prakan-markers-source";
+            let prakanMarkersVisible = false;
+
+            function toggleMarkers() {
+                prakanMarkersVisible = !prakanMarkersVisible;
+                const layer = map.getLayer(prakanMarkersLayerId);
+                if (layer) {
+                    map.setLayoutProperty(prakanMarkersLayerId, 'visibility', prakanMarkersVisible ? 'visible' : 'none');
+                }
+            }
+
+            function fetchAndDisplayprakanMarkers() {
+                fetch('http://192.168.10.166:8000/api/v1/duckDBs/places/th/region?limit=260000')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.data && data.data.type === "FeatureCollection" && Array.isArray(data.data.features)) {
+                            const combinedGeoJSON = {
+                                type: "FeatureCollection",
+                                features: data.data.features.map(feature => ({
+                                    type: "Feature",
+                                    geometry: feature.geometry,
+                                    properties: {
+                                        name: feature.properties.name || '-',
+                                        region: feature.properties.region || '-',
+                                        country: feature.properties.country || '-'
+                                    }
+                                }))
+                            };
+
+                            // Check if source already exists
+                            if (map.getSource(prakanMarkersSourceId)) {
+                                map.getSource(prakanMarkersSourceId).setData(combinedGeoJSON);
+                            } else {
+                                // Add GeoJSON source
+                                map.addSource(prakanMarkersSourceId, {
+                                    type: "geojson",
+                                    data: combinedGeoJSON
+                                });
+
+                                // Add layer for markers
+                                map.addLayer({
+                                    id: prakanMarkersLayerId,
+                                    type: "circle",
+                                    source: prakanMarkersSourceId,
+                                    paint: {
+                                        "circle-radius": 4, //ขนาด
+                                        "circle-color": "#73fe57", //สีจุด
+                                        "circle-stroke-color": "#73fe57", //สีของออร่า
+                                        "circle-stroke-width": 2, //ความกลม
+                                        "circle-blur": 0.8 //ระดับการฟุ้ง
+                                    },
+                                    layout: {
+                                        visibility: 'none'
+                                    }
+                                });
+
+                                map.on("click", prakanMarkersLayerId, e => {
+                                    const properties = e.features[0].properties;
+                                    const coordinates = e.features[0].geometry.coordinates.slice();
+
+                                    const popupContent = document.createElement('div');
+                                    popupContent.className = 'custom-popup';
+                                    popupContent.innerHTML = `
+                                        <strong>ชื่อสถานที่:</strong> ${properties.name}<br>
+                                        <strong>จังหวัด:</strong> ${properties.region}<br>
+                                        <strong>ประเทศ:</strong> ${properties.country}
+                                    `;
+
+                                    new maplibregl.Popup()
+                                        .setLngLat(coordinates)
+                                        .setDOMContent(popupContent)
+                                        .addTo(map);
+                                });
+
+                                map.on('zoom', () => {
+                                    const currentZoom = map.getZoom();
+                                    const visibility = currentZoom > 8 ? 'visible' : 'none';
+                                    map.setLayoutProperty(prakanMarkersLayerId, 'visibility', visibility);
+                                });
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error fetching markers:', error));
+            }
+
+            function clearPrakanMarkers() {
+                if (map.getLayer(prakanMarkersLayerId)) {
+                    map.removeLayer(prakanMarkersLayerId);
+                }
+                if (map.getSource(prakanMarkersSourceId)) {
+                    map.removeSource(prakanMarkersSourceId);
+                }
+            }
+            function prakanMarkerToggle(isChecked) {
+                if (isChecked) {
+                    fetchAndDisplayprakanMarkers();
+                } else {
+                    clearPrakanMarkers();
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+
+// H3 fast limit 200,000
+            let H3HPolygonSourceId = "h3-polygon-source";
+            let H3HPolygonLayerId = "h3-polygon-layer";
+            let H3HPolygonVisible = true;
+
+            function toggleH3HPolygons() {
+                H3HPolygonVisible = !H3HPolygonVisible;
+                const layer = map.getLayer(H3HPolygonLayerId);
+                if (layer) {
+                    map.setLayoutProperty(H3HPolygonLayerId, 'visibility', H3HPolygonVisible ? 'visible' : 'none');
+                }
+            }
+
+            function H3HPolygonsFetch() {
+                fetch('http://192.168.10.166:8000/api/v1/duckDBs/places/h3/APIregion')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success" && data.data.type === "FeatureCollection" && Array.isArray(data.data.features)) {
+                            const combinedGeoJSON = {
+                                type: "FeatureCollection",
+                                features: data.data.features,
+                            };
+
+                            if (map.getSource(H3HPolygonSourceId)) {
+                                map.getSource(H3HPolygonSourceId).setData(combinedGeoJSON);
+                            } else {
+                                map.addSource(H3HPolygonSourceId, {
+                                    type: "geojson",
+                                    data: combinedGeoJSON,
+                                });
+
+                                map.addLayer({
+                                    id: H3HPolygonLayerId,
+                                    type: "fill",
+                                    source: H3HPolygonSourceId,
+                                    layout: {},
+                                    paint: {
+                                        "fill-color": [
+                                            "case",
+                                            ["<=", ["get", "point_count"], 10], "#c7f999",  
+                                            ["all", [">", ["get", "point_count"], 10], ["<=", ["get", "point_count"], 40]], "#97f800", 
+                                            ["all", [">", ["get", "point_count"], 40], ["<=", ["get", "point_count"], 100]], "#f8e300", 
+                                            ["all", [">", ["get", "point_count"], 100], ["<=", ["get", "point_count"], 200]], "#f88e00", 
+                                            ["all", [">", ["get", "point_count"], 200], ["<=", ["get", "point_count"], 500]], "#ff0000", 
+                                            ["all", [">", ["get", "point_count"], 500], ["<=", ["get", "point_count"], 1000]], "#60001c",
+                                            [">", ["get", "point_count"], 1000], "#000000", 
+                                            "#cccccc" 
+                                        ],
+                                        "fill-opacity": 0.4,
+                                    },
+                                });
+
+                                map.on("click", H3HPolygonLayerId, (e) => {
+                                    const feature = e.features[0];
+                                    const properties = feature.properties || {};
+                                    const popupContent = document.createElement("div");
+                                    popupContent.className = "custom-popup";
+                                    popupContent.innerHTML = `
+                                        <strong>จำนวนจุดสำคัญ:</strong> ${properties.point_count || 0}<br>
+                                    `;
+
+                                    new maplibregl.Popup()
+                                        .setLngLat(e.lngLat)
+                                        .setDOMContent(popupContent)
+                                        .addTo(map);
+                                });
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error fetching H3 polygons:', error));
+            }
+
+            function clearH3HPolygons() {
+                if (map.getLayer(H3HPolygonLayerId)) {
+                    map.removeLayer(H3HPolygonLayerId);
+                }
+                if (map.getSource(H3HPolygonSourceId)) {
+                    map.removeSource(H3HPolygonSourceId);
+                }
+            }
+            function H3HhandlePolygonToggle(isChecked) {
+                if (isChecked) {
+                    H3HPolygonsFetch();
+                } else {
+                    clearH3HPolygons();
+                }
+            }
+
+
+
+
+
+
+
+//--------------------------------------------------
+//--------------------------------------------------
+
+
+
+
+
+
+//--------------------------------------------------
+//--------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+//point กทม ขึ้น เปิดปิดได้ปกติ มีปัญหาเรื่องระดับซูมจะเห็น ซูมไว้ 13 เเต่มันโชว์เลย มันต้องขยับระดับก่อนถึงจะเเสดง   กทม
+let markers = []; 
+                let markersVisible = false; 
+
+                function toggleMarkers() {
+                    markersVisible = !markersVisible; 
+                    markers.forEach(marker => {
+                        if (markersVisible) {
+                            marker.addTo(map); 
+                        } else {
+                            marker.remove();
+                        }
+                    });
+                }
+
+                function toggleMarkersVisibility() {
+                    const zoomLevel = map.getZoom();
+                    if (zoomLevel >= 10) {
+                        markers.forEach(marker => marker.addTo(map)); 
+                    } else {
+                        markers.forEach(marker => marker.remove()); 
+                    }
+                }
+
+                function fetchAndDisplayMarkers() {
+                fetch('http://192.168.10.166:8000/api/v1/duckDBs/places/th/region?region=bangkok')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.data && data.data.type === "FeatureCollection" && Array.isArray(data.data.features)) {
+                            data.data.features.forEach(feature => {
+                                const properties = feature.properties || {};
+                                const geometry = feature.geometry || {};
+                                const coordinates = geometry.coordinates || [];
+
+                                const latitude = coordinates[1];
+                                const longitude = coordinates[0];
+
+                                const popupContent = `
+                                    <strong>ชื่อสถานที่:</strong> ${properties.name || '-'}<br>
+                                    <strong>จังหวัด:</strong> ${properties.region || '-'}<br>
+                                    <strong>ประเทศ:</strong> ${properties.country || '-'}
+                                `;
+
+                                if (latitude && longitude) {
+                                    const markerElement = document.createElement('div');
+                                    markerElement.style.width = "4px";
+                                    markerElement.style.height = "4px";
+                                    markerElement.style.backgroundColor = "#ff6347"; 
+                                    markerElement.style.borderRadius = "50%"; 
+                                    markerElement.style.boxShadow = "0 0 10px rgba(255, 99, 71, 0.7)"; 
+                                    markerElement.style.backgroundSize = "cover";
+                                    markerElement.style.border = "2px solid #ff6347"; 
+
+                                    const marker = new maplibregl.Marker({ element: markerElement })
+                                        .setLngLat([longitude, latitude])
+                                        .addTo(map)
+                                        .setPopup(new maplibregl.Popup({ className: 'custom-popup' })
+                                        .setHTML(popupContent)); 
+                                    markers.push(marker); 
+
+                                    const labelElement = document.createElement('div');
+                                    labelElement.innerText = properties.name || 'ไม่มีชื่อสถานที่';
+                                    labelElement.style.position = 'absolute';
+                                    labelElement.style.fontSize = '8px';
+                                    labelElement.style.top = '15px';
+                                    labelElement.style.fontWeight = 'bold';
+                                    labelElement.style.color = '#333'; 
+                                    labelElement.style.textShadow = '2px 2px 4px rgba(255, 255, 255, 0.7)'; 
+                                    labelElement.style.padding = '2px'; 
+                                    labelElement.style.whiteSpace = 'nowrap';
+                                    labelElement.style.transform = 'translate(-50%, -100%)'; 
+
+                                    const labelMarker = new maplibregl.Marker({ element: labelElement })
+                                        .setLngLat([longitude, latitude])
+                                        .addTo(map);
+
+                                    function toggleLabelVisibility() {
+                                        const zoomLevel = map.getZoom();
+                                        if (zoomLevel >= 13) {
+                                            labelMarker.getElement().style.display = 'block';
+                                        } else {
+                                            labelMarker.getElement().style.display = 'none';
+                                        }
+                                    }
+                                    map.on('zoom', toggleLabelVisibility);
+                                    toggleLabelVisibility();
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => console.error('เกิดข้อผิดพลาด:', error));
+            }
+            map.on('zoom', toggleMarkersVisibility);
+
+            function clearMarkers() {
+                markers.forEach(marker => marker.remove());
+                markers = [];
+            }
+            function handleMarkerToggle(isChecked) {
+                if (isChecked) {
+                    fetchAndDisplayMarkers();
+                } else {
+                    clearMarkers();
+                }
+            }
+
+
+
+
+
+
+
+
+
+//ยังไม่ได้ใช้
+            let H3polygons = [];
+            let H3polygonsVisible = true;
+
+            function toggleH3Polygons() {
+                H3polygonsVisible = !H3polygonsVisible;
+                H3polygons.forEach(polygon => {
+                    if (H3polygonsVisible) {
+                        map.addLayer(polygon);
+                    } else {
+                        map.removeLayer(polygon.id);
+                        map.removeSource(polygon.id);
+                    }
+                });
+            }
+
+            function H3PolygonsFetch() {
+                fetch('http://192.168.10.166:8000/api/v1/duckDBs/places/h3/APIregion')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success" && data.data.type === "FeatureCollection" && Array.isArray(data.data.features)) {
+                            data.data.features.forEach((feature, index) => {
+                                const polygonId = `polygon-${index}`;
+                                const polygonSourceId = `${polygonId}-source`;
+
+                                // เพิ่มข้อมูล GeoJSON เข้าไปใน Source
+                                map.addSource(polygonSourceId, {
+                                    type: "geojson",
+                                    data: {
+                                        type: "FeatureCollection",
+                                        features: [feature]
+                                    }
+                                });
+
+                                // เพิ่มเลเยอร์สำหรับแสดงผล Polygon
+                                map.addLayer({
+                                    id: polygonId,
+                                    type: "fill",
+                                    source: polygonSourceId,
+                                    layout: {},
+                                    paint: {
+                                        "fill-color": "#ff6347", // สี Polygon
+                                        "fill-opacity": 0.4 // ความโปร่งใส
+                                    }
+                                });
+
+                                // เก็บ Polygon ที่เพิ่มเข้าไป
+                                H3polygons.push({
+                                    id: polygonId,
+                                    source: polygonSourceId
+                                });
+
+                                map.on("click", polygonId, e => {
+                                const properties = feature.properties || {};
+                                const popupContent = document.createElement("div");
+                                popupContent.className = "custom-popup"; 
+                                popupContent.innerHTML = `
+                                    <strong>จำนวนจุดสำคัญ:</strong> ${properties.point_count || 0}<br>
+                                `;
+
+                                new maplibregl.Popup()
+                                    .setLngLat(e.lngLat)
+                                    .setDOMContent(popupContent) 
+                                    .addTo(map);
+                                });
+                            });
+                        }
+                    })
+                    .catch(error => console.error('เกิดข้อผิดพลาด:', error));
+            }
+
+            function clearH3Polygons() {
+                H3polygons.forEach(polygon => {
+                    map.removeLayer(polygon.id);
+                    map.removeSource(polygon.source);
+                });
+                H3polygons = [];
+            }
+            function H3handlePolygonToggle(isChecked) {
+                if (isChecked) {
+                    H3PolygonsFetch();
+                } else {
+                    clearH3Polygons();
+                }
+            }
+
+
+
+
+
+
+
+
+            //point นครปฐม ขึ้นเเต่ยังมีปัญหาเวลาปิดไปเเล้วเปิดไม่ขึ้น  ยังไม่ได้กำหนดระดับการซูมให้เเสดง   นครปฐม
+            let accidentMarkersSourceId = "accident-markers-source";
+            let accidentMarkersLayerId = "accident-markers-layer";
+            let accidentMarkersVisible = false;
+            let accidentMarkers = [];
+
+            function toggleMarkers() {
+                accidentMarkersVisible = !accidentMarkersVisible;
+                const layer = map.getLayer(accidentMarkersLayerId);
+                if (layer) {
+                    map.setLayoutProperty(accidentMarkersLayerId, 'visibility', accidentMarkersVisible ? 'visible' : 'none');
+                } else {
+                    if (accidentMarkersVisible) {
+                        fetchAndDisplayAccidentMarkers();
+                    } else {
+                        clearAccidentMarkers();
+                    }
+                }
+            }
+
+            function fetchAndDisplayAccidentMarkers() {
+                fetch('http://192.168.10.166:8000/api/v1/duckDBs/places/th/region?region=Nakhon Pathom')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.data && data.data.type === "FeatureCollection" && Array.isArray(data.data.features)) {
+                            const accidentGeoJSON = {
+                                type: "FeatureCollection",
+                                features: data.data.features.map(feature => ({
+                                    type: "Feature",
+                                    geometry: feature.geometry,
+                                    properties: {
+                                        name: feature.properties.name || '-',
+                                        region: feature.properties.region || '-',
+                                        country: feature.properties.country || '-'
+                                    }
+                                }))
+                            };
+
+                            // Check if the source already exists
+                            if (map.getSource(accidentMarkersSourceId)) {
+                                map.getSource(accidentMarkersSourceId).setData(accidentGeoJSON);
+                            } else {
+                                // Add GeoJSON source
+                                map.addSource(accidentMarkersSourceId, {
+                                    type: "geojson",
+                                    data: accidentGeoJSON
+                                });
+
+                                // Add markers with custom text
+                                accidentGeoJSON.features.forEach(feature => {
+                                    const latitude = feature.geometry.coordinates[1];
+                                    const longitude = feature.geometry.coordinates[0];
+                                    const properties = feature.properties;
+
+                                    const markerElement = document.createElement('div');
+                                    markerElement.style.width = "4px";
+                                    markerElement.style.height = "4px";
+                                    markerElement.style.backgroundColor = "#ff6347"; 
+                                    markerElement.style.borderRadius = "50%"; 
+                                    markerElement.style.boxShadow = "0 0 10px rgba(255, 99, 71, 0.7)"; 
+                                    markerElement.style.backgroundSize = "cover";
+                                    markerElement.style.border = "2px solid #ff6347"; 
+
+                                    // Create a marker and popup for text
+                                    const marker = new maplibregl.Marker({ element: markerElement })
+                                        .setLngLat([longitude, latitude])
+                                        .addTo(map);
+
+                                    // เก็บมาร์คเกอร์ในอาร์เรย์
+                                    accidentMarkers.push(marker);
+
+                                    const labelElement = document.createElement('div');
+                                    labelElement.innerText = properties.name || 'ไม่มีชื่อสถานที่';
+                                    labelElement.style.position = 'absolute';
+                                    labelElement.style.fontSize = '8px';
+                                    labelElement.style.top = '15px';
+                                    labelElement.style.fontWeight = 'bold';
+                                    labelElement.style.color = '#333'; 
+                                    labelElement.style.textShadow = '2px 2px 4px rgba(255, 255, 255, 0.7)'; 
+                                    labelElement.style.padding = '2px'; 
+                                    labelElement.style.whiteSpace = 'nowrap';
+                                    labelElement.style.transform = 'translate(-50%, -100%)'; 
+
+                                    const labelMarker = new maplibregl.Marker({ element: labelElement })
+                                        .setLngLat([longitude, latitude])
+                                        .addTo(map);
+
+                                    function toggleLabelVisibility() {
+                                        const zoomLevel = map.getZoom();
+                                        if (zoomLevel >= 13) {
+                                            labelMarker.getElement().style.display = 'block';
+                                        } else {
+                                            labelMarker.getElement().style.display = 'none';
+                                        }
+                                    }
+                                    map.on('zoom', toggleLabelVisibility);
+                                    toggleLabelVisibility();
+
+                                    const popupContent = `
+                                        <strong>ชื่อสถานที่:</strong> ${properties.name}<br>
+                                        <strong>จังหวัด:</strong> ${properties.region}<br>
+                                        <strong>ประเทศ:</strong> ${properties.country}
+                                    `;
+                                    const popup = new maplibregl.Popup({ className: 'custom-popup' })
+                                        .setHTML(popupContent)
+                                        .setMaxWidth("300px");
+
+                                    marker.setPopup(popup);
+                                });
+                            }
+                        }
+                    })
+                    .catch(error => console.error('เกิดข้อผิดพลาด:', error));
+            }
+
+            function clearAccidentMarkers() {
+                accidentMarkers.forEach(marker => marker.remove());
+                accidentMarkers = []; 
+            }
+
+            function handleAccidentMarkerToggle(isChecked) {
+                if (isChecked) {
+                    fetchAndDisplayAccidentMarkers(); 
+                } else {
+                    clearAccidentMarkers(); 
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+        
+
+//ยังไไม่ได้ใช้
+            let github = [];
+            let githubVisible = true;
+
+            function toggleGithubMarkers() {
+                githubVisible = !githubVisible; 
+                github.forEach(marker => {
+                    if (githubVisible) {
+                        marker.addTo(map); 
+                    } else {
+                        marker.remove();
+                    }
+                });
+            }
+
+            function fetchAndDisplayGithubMarkers() {
+                fetch('http://192.168.10.166:8000/api/v1/github/accident/data/select?file=data_5')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.data && data.data.type === "FeatureCollection" && Array.isArray(data.data.features)) {
+                            data.data.features.forEach(feature => {
+                                const properties = feature.properties || {};
+                                const geometry = feature.geometry || {};
+                                const coordinates = geometry.coordinates || [];
+
+                                const latitude = coordinates[1];
+                                const longitude = coordinates[0];
+
+                                if (latitude && longitude) {
+                                    const popupContent = `
+                                        <strong>ละติจูด:</strong> ${properties.lat || '-'}<br>
+                                        <strong>ลองจิจูด:</strong> ${properties.lon || '-'}
+                                    `;
+
+                                    const markerElement = document.createElement('div');
+                                    markerElement.style.width = "4px";
+                                    markerElement.style.height = "4px";
+                                    markerElement.style.backgroundColor = "#ffd666"; 
+                                    markerElement.style.borderRadius = "50%"; 
+                                    markerElement.style.boxShadow = "0 0 10px rgba(76, 175, 80, 0.4)"; 
+                                    markerElement.style.border = "2px solid #ffd666"; 
+
+                                    const marker = new maplibregl.Marker({ element: markerElement })
+                                        .setLngLat([longitude, latitude])
+                                        .addTo(map)
+                                        .setPopup(new maplibregl.Popup({ className: 'custom-popup' })
+                                        .setHTML(popupContent)); 
+                                    github.push(marker); 
+
+                                    const labelElement = document.createElement('div');
+                                    labelElement.innerText = `(${latitude.toFixed(2)}, ${longitude.toFixed(2)})`;
+                                    labelElement.style.position = 'absolute';
+                                    labelElement.style.fontSize = '8px';
+                                    labelElement.style.top = '15px';
+                                    labelElement.style.fontWeight = 'bold';
+                                    labelElement.style.color = '#555'; 
+                                    labelElement.style.textShadow = '2px 2px 4px rgba(255, 255, 255, 0.7)'; 
+                                    labelElement.style.padding = '2px'; 
+                                    labelElement.style.whiteSpace = 'nowrap';
+                                    labelElement.style.transform = 'translate(-50%, -100%)'; 
+
+                                    const labelMarker = new maplibregl.Marker({ element: labelElement })
+                                        .setLngLat([longitude, latitude])
+                                        .addTo(map);
+
+                                    function toggleLabelVisibility() {
+                                        const zoomLevel = map.getZoom();
+                                        if (zoomLevel >= 13) {
+                                            labelMarker.getElement().style.display = 'block';
+                                        } else {
+                                            labelMarker.getElement().style.display = 'none';
+                                        }
+                                    }
+                                    map.on('zoom', toggleLabelVisibility);
+                                    toggleLabelVisibility();
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => console.error('เกิดข้อผิดพลาด:', error));
+            }
+
+            function clearreMarkers() {
+                github.forEach(marker => marker.remove());
+                github = [];
+            }
+            function handleGithubToggle(isChecked) {
+                if (isChecked) {
+                    fetchAndDisplayGithubMarkers();
+                } else {
+                    clearGithubMarkers();
+                }
+            }
+
+
+
+
+
+
+
+            //ตัวเเปรของ  Checkbox  LayerBox
+            function toggleCheckboxBox() {
+                const checkboxBox = document.getElementById('checkboxBox');
+                checkboxBox.classList.toggle('show');
+            }
+            function toggleLayerBox() {
+                const layerBox = document.getElementById('layerBox');
+                layerBox.classList.toggle('show');
+            }   
+    </script>
+</body>
+</html>
