@@ -226,7 +226,7 @@
             }
 
             function fetchAndDisplayKTMMarkers() {
-                fetch('https://a46f-125-26-174-78.ngrok-free.app/api/v1/duckDBs/places/th/region?region=bangkok')
+                fetch('http://192.168.10.166:8080/api/v1/duckDBs/places/th/region?region=bangkok')
                     .then(response => response.json())
                     .then(data => {
                         if (data.data && data.data.type === "FeatureCollection" && Array.isArray(data.data.features)) {
