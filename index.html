@@ -153,7 +153,7 @@
             <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="NaKhorMarkerToggle(this.checked)">นครปฐม</label>
             <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="KTMMarkerToggle(this.checked)">กทม</label>
             <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="H3HhandlePolygonToggle(this.checked)">H3 เเบบเร็ว</label>
-            <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="prakanMarkerToggle(this.checked)">จุด 1 เเสน</label>
+            <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="prakanMarkerToggle(this.checked)">จุด 2 เเสน +</label>
         </div>
         
         
@@ -202,6 +202,8 @@
         //     }
 
 
+        //consol.log 
+
 
 
 
@@ -226,7 +228,7 @@
             }
 
             function fetchAndDisplayKTMMarkers() {
-                fetch('https://192.168.10.166:8080/api/v1/duckDBs/places/th/region?region=bangkok')
+                fetch('http://192.168.10.166:8080/api/v1/duckDBs/places/th/region?region=bangkok')
                     .then(response => response.json())
                     .then(data => {
                         if (data.data && data.data.type === "FeatureCollection" && Array.isArray(data.data.features)) {
@@ -511,7 +513,7 @@
 
                                 map.on('zoom', () => {
                                     const currentZoom = map.getZoom();
-                                    const visibility = currentZoom > 8 ? 'visible' : 'none';
+                                    const visibility = currentZoom > 10 ? 'visible' : 'none';
                                     map.setLayoutProperty(prakanMarkersLayerId, 'visibility', visibility);
                                 });
                             }
@@ -546,7 +548,7 @@
 
 
 
-// H3 fast limit 200,000
+// H3 fast limit 260,000
             let H3HPolygonSourceId = "h3-polygon-source";
             let H3HPolygonLayerId = "h3-polygon-layer";
             let H3HPolygonVisible = true;
@@ -661,7 +663,7 @@
 
 
 
-//point กทม ขึ้น เปิดปิดได้ปกติ มีปัญหาเรื่องระดับซูมจะเห็น ซูมไว้ 13 เเต่มันโชว์เลย มันต้องขยับระดับก่อนถึงจะเเสดง   กทม
+// //point กทม ขึ้น เปิดปิดได้ปกติ มีปัญหาเรื่องระดับซูมจะเห็น ซูมไว้ 13 เเต่มันโชว์เลย มันต้องขยับระดับก่อนถึงจะเเสดง   กทม
 // let markers = []; 
 //                 let markersVisible = false; 
 
