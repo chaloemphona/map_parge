@@ -227,80 +227,91 @@
                 }
             }
 
-            function fetchAndDisplayKTMMarkers() {
-                fetch('https://b602-125-26-174-54.ngrok-free.app/api/v1/duckDBs/places/th/region?region=bangkok')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.data && data.data.type === "FeatureCollection" && Array.isArray(data.data.features)) {
-                            const combinedGeoJSON = {
-                                type: "FeatureCollection",
-                                features: data.data.features.map(feature => ({
-                                    type: "Feature",
-                                    geometry: feature.geometry,
-                                    properties: {
-                                        name: feature.properties.name || '-',
-                                        region: feature.properties.region || '-',
-                                        country: feature.properties.country || '-'
-                                    }
-                                }))
-                            };
-
-                            // Check if source already exists
-                            if (map.getSource(KTMMarkersSourceId)) {
-                                map.getSource(KTMMarkersSourceId).setData(combinedGeoJSON);
-                            } else {
-                                // Add GeoJSON source
-                                map.addSource(KTMMarkersSourceId, {
-                                    type: "geojson",
-                                    data: combinedGeoJSON
-                                });
-
-                                // Add layer for markers
-                                map.addLayer({
-                                    id: KTMMarkersLayerId,
-                                    type: "circle",
-                                    source: KTMMarkersSourceId,
-                                    paint: {
-                                        "circle-radius": 4, //ขนาด
-                                        "circle-color": "#FF0000", //สีจุด
-                                        "circle-stroke-color": "#FF0000", //สีของออร่า
-                                        "circle-stroke-width": 2, //ความกลม
-                                        "circle-blur": 0.8 //ระดับการฟุ้ง
-                                    },
-                                    layout: {
-                                        visibility: 'none'
-                                    }
-                                });
-
-                                map.on("click", KTMMarkersLayerId, e => {
-                                    const properties = e.features[0].properties;
-                                    const coordinates = e.features[0].geometry.coordinates.slice();
-
-                                    // สร้างองค์ประกอบ HTML สำหรับป๊อปอัพ
-                                    const popupContent = document.createElement('div');
-                                    popupContent.className = 'custom-popup';
-                                    popupContent.innerHTML = `
-                                        <strong>ชื่อสถานที่:</strong> ${properties.name}<br>
-                                        <strong>จังหวัด:</strong> ${properties.region}<br>
-                                        <strong>ประเทศ:</strong> ${properties.country}
-                                    `;
-
-                                    new maplibregl.Popup()
-                                        .setLngLat(coordinates)
-                                        .setDOMContent(popupContent)
-                                        .addTo(map);
-                                });
-
-                                map.on('zoom', () => {
-                                    const currentZoom = map.getZoom();
-                                    const visibility = currentZoom > 10 ? 'visible' : 'none';
-                                    map.setLayoutProperty(KTMMarkersLayerId, 'visibility', visibility);
-                                });
-                            }
-                        }
-                    })
-                    .catch(error => console.error('Error fetching markers:', error));
+function fetchAndDisplayKTMMarkers() {
+    fetch('https://b602-125-26-174-54.ngrok-free.app/api/v1/duckDBs/places/th/region?region=bangkok')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+            return response.json();
+        })
+        .then(data => {
+            // ปรับโครงสร้างการดึงข้อมูล
+            if (data.status === "success" && data.data && data.data.type === "FeatureCollection" && Array.isArray(data.data.features)) {
+                const combinedGeoJSON = {
+                    type: "FeatureCollection",
+                    features: data.data.features.map(feature => ({
+                        type: "Feature",
+                        geometry: feature.geometry,
+                        properties: {
+                            name: feature.properties.name || '-',
+                            region: feature.properties.region || '-',
+                            country: feature.properties.country || '-'
+                        }
+                    }))
+                };
+
+                // ตรวจสอบว่ามี Source และ Layer อยู่แล้วหรือไม่
+                if (map.getSource(KTMMarkersSourceId)) {
+                    map.getSource(KTMMarkersSourceId).setData(combinedGeoJSON);
+                } else {
+                    // เพิ่ม GeoJSON Source
+                    map.addSource(KTMMarkersSourceId, {
+                        type: "geojson",
+                        data: combinedGeoJSON
+                    });
+
+                    // เพิ่ม Layer แสดง Marker
+                    map.addLayer({
+                        id: KTMMarkersLayerId,
+                        type: "circle",
+                        source: KTMMarkersSourceId,
+                        paint: {
+                            "circle-radius": 4,
+                            "circle-color": "#FF0000",
+                            "circle-stroke-color": "#FF0000",
+                            "circle-stroke-width": 2,
+                            "circle-blur": 0.8
+                        },
+                        layout: {
+                            visibility: 'none'
+                        }
+                    });
+
+                    // เพิ่ม Event เมื่อคลิกที่ Marker
+                    map.on("click", KTMMarkersLayerId, e => {
+                        const properties = e.features[0].properties;
+                        const coordinates = e.features[0].geometry.coordinates.slice();
+
+                        // สร้าง HTML สำหรับ Popup
+                        const popupContent = document.createElement('div');
+                        popupContent.className = 'custom-popup';
+                        popupContent.innerHTML = `
+                            <strong>ชื่อสถานที่:</strong> ${properties.name}<br>
+                            <strong>จังหวัด:</strong> ${properties.region}<br>
+                            <strong>ประเทศ:</strong> ${properties.country}
+                        `;
+
+                        new maplibregl.Popup()
+                            .setLngLat(coordinates)
+                            .setDOMContent(popupContent)
+                            .addTo(map);
+                    });
+
+                    // เพิ่มการเปลี่ยน visibility ตามระดับ zoom
+                    map.on('zoom', () => {
+                        const currentZoom = map.getZoom();
+                        const visibility = currentZoom > 10 ? 'visible' : 'none';
+                        map.setLayoutProperty(KTMMarkersLayerId, 'visibility', visibility);
+                    });
+                }
+            } else {
+                console.error('Invalid GeoJSON data format:', data);
+            }
+        })
+        .catch(error => console.error('Error fetching markers:', error));
+}
+
 
             function clearKTMMarkers() {
                 if (map.getLayer(KTMMarkersLayerId)) {
