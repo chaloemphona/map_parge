@@ -150,8 +150,8 @@
             <!-- <label><input type="checkbox" id="toggleMarkersCheckbox" onchange="handleMarkerToggle(this.checked)">กรุงเทพฯ</label> -->
             <!-- <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="H3handlePolygonToggle(this.checked)">H3 อย่าเปิด</label> -->
             <!-- <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="handleGithubToggle(this.checked)">github</label> -->
-            <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="NaKhorMarkerToggle(this.checked)">นครปฐม</label>
             <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="KTMMarkerToggle(this.checked)">กทม</label>
+            <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="NaKhorMarkerToggle(this.checked)">นครปฐม</label>
             <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="H3HhandlePolygonToggle(this.checked)">H3 เเบบเร็ว</label>
             <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="prakanMarkerToggle(this.checked)">จุด 2 เเสน +</label>
         </div>
@@ -228,7 +228,7 @@
             }
 
 function fetchAndDisplayKTMMarkers() {
-    fetch('https://b602-125-26-174-54.ngrok-free.app/api/v1/duckDBs/places/th/region')
+    fetch('https://bb84-125-26-174-54.ngrok-free.app/api/v1/duckDBs/places/th/region')
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
