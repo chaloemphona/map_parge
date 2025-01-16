@@ -7,7 +7,7 @@
     <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
     <style>
         #map {
-            height: 600px;    /*700px*/
+            height: 700px;    /*700px*/
             width: 100%;
             position: relative;
         }
@@ -57,19 +57,15 @@
             z-index: 1000;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
-
         .layer-button:hover {
             background-color: #ff3c01;
         }
-
         .layer-button-top {
-            top: 10px; 
-        }
-
-        .layer-button-bottom {
             top: 60px; 
         }
-
+        .layer-button-bottom {
+            top: 110px; 
+        }
         .layer-box {
             position: absolute;
             top: 10px;
@@ -89,11 +85,9 @@
             z-index: 1000;
             transition: left 0.3s ease-in-out;
         }
-
         .layer-box.show {
             left: 75px;
         }
-
         .layer-box p {
             font-family: 'Georgia', serif; 
             font-size: 18px; 
@@ -103,7 +97,7 @@
 
         .checkbox-box { 
             position: absolute;
-            top: 10px;
+            top: 60px;
             left: 10px;
             width: 300px;
             background-color: rgba(255, 255, 255, 0.1); 
@@ -116,12 +110,10 @@
             backdrop-filter: blur(3px); 
             -webkit-backdrop-filter: blur(3px); 
         }
-
         .checkbox-box.show {
             display: block;
             left: 75px;
         }
-
         .checkbox-box label {
             font-family: Arial, sans-serif;
             font-size: 14px;
@@ -129,6 +121,34 @@
             margin-bottom: 5px;
         }
 
+        .layer-button:hover {
+            background-color: #ff3c01;
+        }
+        .token-button-bottom {
+            top: 10px; 
+        }
+        .token-box.show {
+            left: 75;  /* ปรับตำแหน่งให้แสดงจากซ้าย */
+        }
+        .token-box {
+            position: absolute;
+            top: 10px;
+            left: -430px;
+            width: 370px;
+            height: 30px;
+            background-color: rgba(255, 255, 255, 0.1); 
+            border: 1px solid #ffffff; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+            display: flex;
+            align-items: center; 
+            justify-content: center;
+            padding: 5px; 
+            backdrop-filter: blur(3px); /*blur(10px); จะเบลอมาก*/   /*blur(3px); จะเบลอน้อย*/
+            -webkit-backdrop-filter: blur(3px); /*blur(10px); จะเบลอมาก*/   /*blur(3px); จะเบลอน้อย*/
+            z-index: 1000;
+            transition: left 0.3s ease-in-out;
+        }
         
 
     </style>
@@ -143,11 +163,32 @@
     <div id="map">
 
         <button class="layer-button layer-button-bottom" onclick="toggleLayerBox()">
-            <img src="https://cdn-icons-png.flaticon.com/128/1975/1975643.png" alt="Layer Box" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 5px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/1975/1975643.png" alt="Layer Box" style="width: 24px; height: 24px; vertical-align: middle;">
         </button>
         <button class="layer-button layer-button-top" onclick="toggleCheckboxBox()">
-            <img src="https://cdn-icons-png.flaticon.com/128/3861/3861399.png" alt="Toggle Markers" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 5px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/10042/10042921.png" alt="Toggle Markers" style="width: 24px; height: 24px; vertical-align: middle;">
         </button>
+        <button class="layer-button token-button-bottom" onclick="toggleTokenboxBox()">
+            <img src="https://cdn-icons-png.flaticon.com/128/17707/17707268.png" alt="Token Box" style="width: 24px; height: 24px; vertical-align: middle;">
+        </button>
+        <!-- https://cdn-icons-png.flaticon.com/128/3861/3861399.png -->
+
+        <div id="tokenboxBox" class="token-box">
+            <form id="tokenForm">
+                <label for="token_req"></label>
+                <input 
+                    type="text" 
+                    id="token_req" 
+                    name="token_req" 
+                    value="" 
+                    required 
+                    style="width: 300px;" 
+                    placeholder="กรอกโทเค็นที่นี่">
+                <button type="submit">ยืนยัน</button>
+            </form>
+        </div>
+
+
         <div id="checkboxBox" class="checkbox-box">
             <!-- <label><input type="checkbox" id="toggleMarkersCheckbox" onchange="handleMarkerToggle(this.checked)">กรุงเทพฯ</label> -->
             <!-- <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="H3handlePolygonToggle(this.checked)">H3 อย่าเปิด</label> -->
@@ -166,14 +207,22 @@
                 จะใส่อะไร ดาต้า กราฟ ดีเทล ต่างๆ
             </p>
         </div>
+        
     </div>
 
     <br>
-    <form id="tokenForm">
+    <!-- <form id="tokenForm">
         <label for="token_req">Token:</label>
-        <input type="text" id="token_req" name="token_req" value="" required>
-        <button type="submit">Submit</button>
-    </form>
+        <input 
+            type="text" 
+            id="token_req" 
+            name="token_req" 
+            value="" 
+            required 
+            style="width: 400px;" 
+            placeholder="กรอกโทเค็นที่นี่">
+        <button type="submit">ยืนยัน</button>
+    </form> -->
 
 
     <script>
@@ -711,6 +760,10 @@
 
 
             //ตัวเเปรของ  Checkbox  LayerBox
+            function toggleTokenboxBox() {
+                const tokenboxBox = document.getElementById('tokenboxBox');
+                tokenboxBox.classList.toggle('show');
+            }
             function toggleCheckboxBox() {
                 const checkboxBox = document.getElementById('checkboxBox');
                 checkboxBox.classList.toggle('show');
@@ -719,6 +772,8 @@
                 const layerBox = document.getElementById('layerBox');
                 layerBox.classList.toggle('show');
             }
+
+
             
             
 
