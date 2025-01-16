@@ -7,7 +7,7 @@
     <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
     <style>
         #map {
-            height: 700px;    /*600px*/
+            height: 600px;    /*700px*/
             width: 100%;
             position: relative;
         }
@@ -84,8 +84,8 @@
             align-items: center; 
             justify-content: center;
             padding: 10px; 
-            backdrop-filter: blur(3px); 
-            -webkit-backdrop-filter: blur(3px); 
+            backdrop-filter: blur(3px); /*blur(10px); จะเบลอมาก*/   /*blur(3px); จะเบลอน้อย*/
+            -webkit-backdrop-filter: blur(3px); /*blur(10px); จะเบลอมาก*/   /*blur(3px); จะเบลอน้อย*/
             z-index: 1000;
             transition: left 0.3s ease-in-out;
         }
@@ -101,7 +101,7 @@
             text-align: center; 
         }
 
-        .checkbox-box {
+        .checkbox-box { 
             position: absolute;
             top: 10px;
             left: 10px;
@@ -168,6 +168,13 @@
         </div>
     </div>
 
+    <br>
+    <form id="tokenForm">
+        <label for="token_req">Token:</label>
+        <input type="text" id="token_req" name="token_req" value="" required>
+        <button type="submit">Submit</button>
+    </form>
+
 
     <script>
         const map = new maplibregl.Map({
@@ -205,11 +212,28 @@
         //     }
         //consol.log 
 
-   
-        const token = "6eac45d7-6055-4183-bb1c-9930fba64a5b"; 
 
-        const BASE_URL = "https://7a31-125-26-174-54.ngrok-free.app";
-        //http://192.168.10.166:8000 //http://127.0.0.1:8000  //https://7a31-125-26-174-54.ngrok-free.app
+
+
+
+        // const token = "d10faced-1285-4dc5-8e75-813d54006438"; //สำหรับการเเบบต้องเปลี่ยนเองตลอด
+        let token = ""; //กรอกใส่ที่หน้าเเผนที่ไปเลย
+        // ฟังก์ชันสำหรับจัดการเมื่อฟอร์มถูกส่ง
+        document.getElementById("tokenForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // ป้องกันการรีเฟรชหน้า
+            const tokenInput = document.getElementById("token_req").value.trim();
+
+            if (tokenInput) {
+                token = tokenInput; // อัปเดตค่า token
+                alert(`Token ถูกอัปเดต: ${token}`);
+            } else {
+                alert("กรุณากรอก Token");
+            }
+        });
+
+        const BASE_URL = "http://127.0.0.1:8000"; 
+        // //http://192.168.10.166:8000 //http://127.0.0.1:8000  //https://7a31-125-26-174-54.ngrok-free.app
+
 
         //point กทม 
             let KTMMarkersLayerId = "KTM-markers-layer";
@@ -326,6 +350,10 @@
                     clearKTMMarkers();
                 }
             }
+
+
+
+
 
 
 
@@ -446,6 +474,12 @@
 
 
 
+
+
+
+
+
+
 //point fast 100,000   ลิมิต
             let prakanMarkersLayerId = "prakan-markers-layer";
             let prakanMarkersSourceId = "prakan-markers-source";
@@ -505,7 +539,7 @@
                                     type: "circle",
                                     source: prakanMarkersSourceId,
                                     paint: {
-                                        "circle-radius": 4, //ขนาด
+                                        "circle-radius": 3, //ขนาด
                                         "circle-color": "#73fe57", //สีจุด
                                         "circle-stroke-color": "#73fe57", //สีของออร่า
                                         "circle-stroke-width": 2, //ความกลม
@@ -560,6 +594,14 @@
                     clearPrakanMarkers();
                 }
             }
+
+
+
+
+
+
+
+
 
 
 
@@ -666,6 +708,8 @@
             }
 
 
+
+
             //ตัวเเปรของ  Checkbox  LayerBox
             function toggleCheckboxBox() {
                 const checkboxBox = document.getElementById('checkboxBox');
@@ -675,6 +719,18 @@
                 const layerBox = document.getElementById('layerBox');
                 layerBox.classList.toggle('show');
             }
+            
+            
+
+            
+//--------------------------------------------------
+//--------------------------------------------------
+
+
+
+//--------------------------------------------------
+//--------------------------------------------------
+
     </script>
 </body>
 </html>
