@@ -769,63 +769,63 @@
 
 
             // รายละเอียด 
-            function fetchMaxPointCount() {
-                if (!token) {
-                    console.error("Token is missing. Please provide a valid token.");
-                    return;
-                }
+            // function fetchMaxPointCount() {
+            //     if (!token) {
+            //         console.error("Token is missing. Please provide a valid token.");
+            //         return;
+            //     }
 
-                fetch(`${BASE_URL}/api/v1/duckDBs/places/th/region/hexagon`, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                        "ngrok-skip-browser-warning": 'skip-browser-warning'
-                    },
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.status === "success" && data.data.type === "FeatureCollection" && Array.isArray(data.data.features)) {
-                            let maxFeature = null;
-                            let maxPointCount = 0;
+            //     fetch(`${BASE_URL}/api/v1/duckDBs/places/th/region/hexagon`, {
+            //         method: "GET",
+            //         headers: {
+            //             "Authorization": `Bearer ${token}`,
+            //             'Content-Type': 'application/json',
+            //             "ngrok-skip-browser-warning": 'skip-browser-warning'
+            //         },
+            //     })
+            //         .then(response => {
+            //             if (!response.ok) {
+            //                 throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
+            //             }
+            //             return response.json();
+            //         })
+            //         .then(data => {
+            //             if (data.status === "success" && data.data.type === "FeatureCollection" && Array.isArray(data.data.features)) {
+            //                 let maxFeature = null;
+            //                 let maxPointCount = 0;
 
-                            data.data.features.forEach(feature => {
-                                const pointCount = feature.properties.point_count || 0;
-                                if (pointCount > maxPointCount) {
-                                    maxPointCount = pointCount;
-                                    maxFeature = feature;
-                                }
-                            });
+            //                 data.data.features.forEach(feature => {
+            //                     const pointCount = feature.properties.point_count || 0;
+            //                     if (pointCount > maxPointCount) {
+            //                         maxPointCount = pointCount;
+            //                         maxFeature = feature;
+            //                     }
+            //                 });
 
-                            const dataMore = document.getElementById("dataMore");
-                            if (dataMore && maxFeature) {
-                                dataMore.innerHTML = `<span>${maxPointCount}</span`;
-                            } else {
-                                console.warn('ไม่พบข้อมูล หรือไม่สามารถอัปเดต #dataMore');
-                            }
-                        } else {
-                            console.error('Unexpected data format received:', data);
-                        }
-                    })
-                    .catch(error => console.error('Error fetching max point count:', error));
-            }
+            //                 const dataMore = document.getElementById("dataMore");
+            //                 if (dataMore && maxFeature) {
+            //                     dataMore.innerHTML = `<span>${maxPointCount}</span`;
+            //                 } else {
+            //                     console.warn('ไม่พบข้อมูล หรือไม่สามารถอัปเดต #dataMore');
+            //                 }
+            //             } else {
+            //                 console.error('Unexpected data format received:', data);
+            //             }
+            //         })
+            //         .catch(error => console.error('Error fetching max point count:', error));
+            // }
 
-            document.getElementById("tokenForm").addEventListener("submit", function(event) {
-                event.preventDefault(); 
-                const tokenInput = document.getElementById("token_req").value.trim();
+            // document.getElementById("tokenForm").addEventListener("submit", function(event) {
+            //     event.preventDefault(); 
+            //     const tokenInput = document.getElementById("token_req").value.trim();
 
-                if (tokenInput) {
-                    token = tokenInput; 
-                    fetchMaxPointCount();
-                } else {
-                    console.error("กรุณากรอก Token");
-                }
-            });
+            //     if (tokenInput) {
+            //         token = tokenInput; 
+            //         fetchMaxPointCount();
+            //     } else {
+            //         console.error("กรุณากรอก Token");
+            //     }
+            // });
 
 
 
