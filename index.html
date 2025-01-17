@@ -7,7 +7,7 @@
     <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
     <style>
         #map {
-            height: 700px;    /*700px*/
+            height: 700px;   
             width: 100%;
             position: relative;
         }
@@ -70,23 +70,26 @@
             position: absolute;
             top: 10px;
             left: -330px;
-            width: 300px;
+            width: 270px;
             height: 650px;
             background-color: rgba(255, 255, 255, 0.1); 
             border: 1px solid #ffffff; 
             border-radius: 8px; 
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
             display: flex;
-            align-items: center; 
-            justify-content: center;
+            flex-direction: column;
+            align-items: flex-start; 
             padding: 10px; 
-            backdrop-filter: blur(3px); /*blur(10px); จะเบลอมาก*/   /*blur(3px); จะเบลอน้อย*/
-            -webkit-backdrop-filter: blur(3px); /*blur(10px); จะเบลอมาก*/   /*blur(3px); จะเบลอน้อย*/
+            backdrop-filter: blur(3px); 
+            -webkit-backdrop-filter: blur(3px); 
             z-index: 1000;
             transition: left 0.3s ease-in-out;
+            color: #2a2a2a;
+            text-align: left; 
+            line-height: 1.5;
         }
         .layer-box.show {
-            left: 75px;
+            left: 75px; 
         }
         .layer-box p {
             font-family: 'Georgia', serif; 
@@ -97,7 +100,7 @@
 
         .checkbox-box { 
             position: absolute;
-            top: 60px;
+            top: 10px;
             left: 10px;
             width: 300px;
             background-color: rgba(255, 255, 255, 0.1); 
@@ -121,45 +124,56 @@
             margin-bottom: 5px;
         }
 
-        .layer-button:hover {
-            background-color: #ff3c01;
-        }
         .token-button-bottom {
             top: 10px; 
         }
         .token-box.show {
-            left: 75;  /* ปรับตำแหน่งให้แสดงจากซ้าย */
+            display: block; 
+            left: 75;  
         }
         .token-box {
             position: absolute;
             top: 10px;
-            left: -430px;
-            width: 370px;
-            height: 30px;
+            left: 10px;   
+            width: 370px;  
             background-color: rgba(255, 255, 255, 0.1); 
             border: 1px solid #ffffff; 
             border-radius: 8px; 
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
-            display: flex;
-            align-items: center; 
-            justify-content: center;
-            padding: 5px; 
+            padding: 10px; 
+            display: none;  
+            z-index: 1000;
             backdrop-filter: blur(3px); /*blur(10px); จะเบลอมาก*/   /*blur(3px); จะเบลอน้อย*/
             -webkit-backdrop-filter: blur(3px); /*blur(10px); จะเบลอมาก*/   /*blur(3px); จะเบลอน้อย*/
-            z-index: 1000;
-            transition: left 0.3s ease-in-out;
+
         }
+
+        #databoxBox {
+            width: 250px;
+            height: 70px; 
+            border: 1px solid #ffffff; 
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.3); 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+            padding: 10px;
+            overflow: hidden; 
+            line-height: 1.5; 
+            color: #ff5e46; 
+            font-family: Arial, sans-serif; 
+            font-size: 16px; 
+        }
+
+        #dataMore span {
+            font-size: 25px;
+            color: rgb(255, 94, 0);
+            font-weight: bold;
+        }
+
         
 
     </style>
 </head>
 <body>
-    <!-- <h1>
-        <img 
-        src="file:///C:/Users/Areeya%20Bunma/Desktop/pandas/risk2.png" 
-        alt="Risk Image" 
-        style="width: 600px; height: auto; vertical-align: middle; margin-right: 10px;">
-    </h1> -->
     <div id="map">
 
         <button class="layer-button layer-button-bottom" onclick="toggleLayerBox()">
@@ -173,6 +187,8 @@
         </button>
         <!-- https://cdn-icons-png.flaticon.com/128/3861/3861399.png -->
 
+
+
         <div id="tokenboxBox" class="token-box">
             <form id="tokenForm">
                 <label for="token_req"></label>
@@ -182,47 +198,36 @@
                     name="token_req" 
                     value="" 
                     required 
-                    style="width: 300px;" 
+                    style="width: 270px;" 
                     placeholder="กรอกโทเค็นที่นี่">
-                <button type="submit">ยืนยัน</button>
+                <button type="submit" style="background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 5px;">ยืนยัน</button>
             </form>
         </div>
 
-
         <div id="checkboxBox" class="checkbox-box">
-            <!-- <label><input type="checkbox" id="toggleMarkersCheckbox" onchange="handleMarkerToggle(this.checked)">กรุงเทพฯ</label> -->
-            <!-- <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="H3handlePolygonToggle(this.checked)">H3 อย่าเปิด</label> -->
-            <!-- <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="handleGithubToggle(this.checked)">github</label> -->
             <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="KTMMarkerToggle(this.checked)">point กทม</label>
             <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="NaKhorMarkerToggle(this.checked)">point นครปฐม</label>
             <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="H3HhandlePolygonToggle(this.checked)">ความหนสเเน่น POI</label>
             <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="prakanMarkerToggle(this.checked)">point 2 เเสน +</label>
         </div>
         
-        
         <div id="layerBox" class="layer-box">
-            <p>
-                เนื้อหา 
-                <br>
-                จะใส่อะไร ดาต้า กราฟ ดีเทล ต่างๆ
-            </p>
+            <p><strong>รายละเอียด</strong></p>
+            <div id="databoxBox" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="flex: 0 0 auto;">
+                    <img src="https://cdn-icons-png.flaticon.com/128/11460/11460616.png" alt="Token Box" style="width: 50px; height: 50px; vertical-align: middle;">
+                </div>
+                <div style="flex: 1; text-align: left; display: flex; flex-direction: column; justify-content: space-between; height: 70px;">
+                    <div id="data01" style="flex: 0 0 auto; height: 20px;">
+                        <p id="databoxText" style="margin: 0; width: 200px; height: 30px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">จำนวนจุดสำคัญสูงสุด</p>
+                    </div>
+                    <div id="dataMore" style="flex: 0 0 auto; height: 20px; display: flex; align-items: center; justify-content: center;">  
+                    </div>
+                </div>
+            </div>
         </div>
-        
     </div>
 
-    <br>
-    <!-- <form id="tokenForm">
-        <label for="token_req">Token:</label>
-        <input 
-            type="text" 
-            id="token_req" 
-            name="token_req" 
-            value="" 
-            required 
-            style="width: 400px;" 
-            placeholder="กรอกโทเค็นที่นี่">
-        <button type="submit">ยืนยัน</button>
-    </form> -->
 
 
     <script>
@@ -265,18 +270,23 @@
 
 
 
-        // const token = "d10faced-1285-4dc5-8e75-813d54006438"; //สำหรับการเเบบต้องเปลี่ยนเองตลอด
-        let token = ""; //กรอกใส่ที่หน้าเเผนที่ไปเลย
-        // ฟังก์ชันสำหรับจัดการเมื่อฟอร์มถูกส่ง
+        let token = ""; 
+
         document.getElementById("tokenForm").addEventListener("submit", function(event) {
-            event.preventDefault(); // ป้องกันการรีเฟรชหน้า
+            event.preventDefault();
             const tokenInput = document.getElementById("token_req").value.trim();
+            const submitButton = event.target.querySelector('button[type="submit"]'); 
 
             if (tokenInput) {
-                token = tokenInput; // อัปเดตค่า token
-                alert(`Token ถูกอัปเดต: ${token}`);
+                token = tokenInput; 
+                submitButton.textContent = "ยืนยันสำเร็จ";
+                submitButton.style.backgroundColor = "green";
+                submitButton.style.color = "white";
+                submitButton.style.border = "none";
+                submitButton.style.cursor = "default";
+                submitButton.disabled = true; 
             } else {
-                alert("กรุณากรอก Token");
+                console.error("กรุณากรอก Token");
             }
         });
 
@@ -284,7 +294,7 @@
         // //http://192.168.10.166:8000 //http://127.0.0.1:8000  //https://7a31-125-26-174-54.ngrok-free.app
 
 
-        //point กทม 
+            //point กทม 
             let KTMMarkersLayerId = "KTM-markers-layer";
             let KTMMarkersSourceId = "KTM-markers-source";
             let KTMMarkersVisible = false;
@@ -326,28 +336,24 @@
                                     }
                                 }))
                             };
-
-                            // Check if source already exists
                             if (map.getSource(KTMMarkersSourceId)) {
                                 map.getSource(KTMMarkersSourceId).setData(combinedGeoJSON);
                             } else {
-                                // Add GeoJSON source
                                 map.addSource(KTMMarkersSourceId, {
                                     type: "geojson",
                                     data: combinedGeoJSON
                                 });
 
-                                // Add layer for markers
                                 map.addLayer({
                                     id: KTMMarkersLayerId,
                                     type: "circle",
                                     source: KTMMarkersSourceId,
                                     paint: {
-                                        "circle-radius": 4, //ขนาด
-                                        "circle-color": "#FF0000", //สีจุด
-                                        "circle-stroke-color": "#FF0000", //สีของออร่า
-                                        "circle-stroke-width": 2, //ความกลม
-                                        "circle-blur": 0.8 //ระดับการฟุ้ง
+                                        "circle-radius": 4, 
+                                        "circle-color": "#FF0000", 
+                                        "circle-stroke-color": "#FF0000", 
+                                        "circle-stroke-width": 2, 
+                                        "circle-blur": 0.8 
                                     },
                                     layout: {
                                         visibility: 'none'
@@ -383,7 +389,6 @@
                     .catch(error => console.error('Error fetching markers:', error));
             }
 
-
             function clearKTMMarkers() {
                 if (map.getLayer(KTMMarkersLayerId)) {
                     map.removeLayer(KTMMarkersLayerId);
@@ -406,7 +411,7 @@
 
 
 
-        //point นครปฐม
+            //point นครปฐม
             let NaKhorMarkersLayerId = "NaKhor-markers-layer";
             let NaKhorMarkersSourceId = "NaKhor-markers-source";
             let NaKhorMarkersVisible = false;
@@ -449,27 +454,24 @@
                                 }))
                             };
 
-                            // Check if source already exists
                             if (map.getSource(NaKhorMarkersSourceId)) {
                                 map.getSource(NaKhorMarkersSourceId).setData(combinedGeoJSON);
                             } else {
-                                // Add GeoJSON source
                                 map.addSource(NaKhorMarkersSourceId, {
                                     type: "geojson",
                                     data: combinedGeoJSON
                                 });
 
-                                // Add layer for markers
                                 map.addLayer({
                                     id: NaKhorMarkersLayerId,
                                     type: "circle",
                                     source: NaKhorMarkersSourceId,
                                     paint: {
-                                        "circle-radius": 4, //ขนาด
-                                        "circle-color": "#63a6ff", //สีจุด
-                                        "circle-stroke-color": "#63a6ff", //สีของออร่า
-                                        "circle-stroke-width": 2, //ความกลม
-                                        "circle-blur": 0.8 //ระดับการฟุ้ง
+                                        "circle-radius": 4,
+                                        "circle-color": "#63a6ff",
+                                        "circle-stroke-color": "#63a6ff",
+                                        "circle-stroke-width": 2, 
+                                        "circle-blur": 0.8 
                                     },
                                     layout: {
                                         visibility: 'none'
@@ -529,7 +531,7 @@
 
 
 
-//point fast 100,000   ลิมิต
+            //point fast 100,000   ลิมิต
             let prakanMarkersLayerId = "prakan-markers-layer";
             let prakanMarkersSourceId = "prakan-markers-source";
             let prakanMarkersVisible = false;
@@ -572,27 +574,25 @@
                                 }))
                             };
 
-                            // Check if source already exists
                             if (map.getSource(prakanMarkersSourceId)) {
                                 map.getSource(prakanMarkersSourceId).setData(combinedGeoJSON);
                             } else {
-                                // Add GeoJSON source
+                                
                                 map.addSource(prakanMarkersSourceId, {
                                     type: "geojson",
                                     data: combinedGeoJSON
                                 });
 
-                                // Add layer for markers
                                 map.addLayer({
                                     id: prakanMarkersLayerId,
                                     type: "circle",
                                     source: prakanMarkersSourceId,
                                     paint: {
-                                        "circle-radius": 3, //ขนาด
-                                        "circle-color": "#73fe57", //สีจุด
-                                        "circle-stroke-color": "#73fe57", //สีของออร่า
-                                        "circle-stroke-width": 2, //ความกลม
-                                        "circle-blur": 0.8 //ระดับการฟุ้ง
+                                        "circle-radius": 3, 
+                                        "circle-color": "#73fe57", 
+                                        "circle-stroke-color": "#73fe57", 
+                                        "circle-stroke-width": 2, 
+                                        "circle-blur": 0.8 
                                     },
                                     layout: {
                                         visibility: 'none'
@@ -654,7 +654,7 @@
 
 
 
-// H3 fast limit 260,000
+            // H3 fast limit 260,000
             let H3HPolygonSourceId = "h3-polygon-source";
             let H3HPolygonLayerId = "h3-polygon-layer";
             let H3HPolygonVisible = true;
@@ -759,20 +759,117 @@
 
 
 
-            //ตัวเเปรของ  Checkbox  LayerBox
-            function toggleTokenboxBox() {
-                const tokenboxBox = document.getElementById('tokenboxBox');
-                tokenboxBox.classList.toggle('show');
-            }
-            function toggleCheckboxBox() {
-                const checkboxBox = document.getElementById('checkboxBox');
-                checkboxBox.classList.toggle('show');
-            }
-            function toggleLayerBox() {
-                const layerBox = document.getElementById('layerBox');
-                layerBox.classList.toggle('show');
+
+
+
+
+            
+
+
+
+
+            // รายละเอียด 
+            function fetchMaxPointCount() {
+                if (!token) {
+                    console.error("Token is missing. Please provide a valid token.");
+                    return;
+                }
+
+                fetch(`${BASE_URL}/api/v1/duckDBs/places/th/region/hexagon`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        "ngrok-skip-browser-warning": 'skip-browser-warning'
+                    },
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === "success" && data.data.type === "FeatureCollection" && Array.isArray(data.data.features)) {
+                            let maxFeature = null;
+                            let maxPointCount = 0;
+
+                            data.data.features.forEach(feature => {
+                                const pointCount = feature.properties.point_count || 0;
+                                if (pointCount > maxPointCount) {
+                                    maxPointCount = pointCount;
+                                    maxFeature = feature;
+                                }
+                            });
+
+                            const dataMore = document.getElementById("dataMore");
+                            if (dataMore && maxFeature) {
+                                dataMore.innerHTML = `<span>${maxPointCount}</span`;
+                            } else {
+                                console.warn('ไม่พบข้อมูล หรือไม่สามารถอัปเดต #dataMore');
+                            }
+                        } else {
+                            console.error('Unexpected data format received:', data);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching max point count:', error));
             }
 
+            document.getElementById("tokenForm").addEventListener("submit", function(event) {
+                event.preventDefault(); 
+                const tokenInput = document.getElementById("token_req").value.trim();
+
+                if (tokenInput) {
+                    token = tokenInput; 
+                    fetchMaxPointCount();
+                } else {
+                    console.error("กรุณากรอก Token");
+                }
+            });
+
+
+
+
+
+
+
+            // //การโขว์ layer Token Check Leayerdata
+            // function toggleTokenboxBox() {
+            //     const tokenboxBox = document.getElementById('tokenboxBox');
+            //     tokenboxBox.classList.toggle('show');
+            // }
+            // function toggleCheckboxBox() {
+            //     const checkboxBox = document.getElementById('checkboxBox');
+            //     checkboxBox.classList.toggle('show');
+            // }
+            // function toggleLayerBox() {
+            //     const layerBox = document.getElementById('layerBox');
+            //     layerBox.classList.toggle('show');
+            // }
+
+
+
+            //การโขว์ layer Token Check Leayerdata เเละ การปิดเมื่อมีการเปิดอีกอัน
+            function toggleBox(boxId) {
+                const boxes = ['tokenboxBox', 'checkboxBox', 'layerBox']; 
+                boxes.forEach(id => {
+                    const box = document.getElementById(id);
+                    if (id === boxId) {
+                        box.classList.toggle('show'); 
+                    } else {
+                        box.classList.remove('show'); 
+                    }
+                });
+            }
+            function toggleTokenboxBox() {
+                toggleBox('tokenboxBox');
+            }
+            function toggleCheckboxBox() {
+                toggleBox('checkboxBox');
+            }
+            function toggleLayerBox() {
+                toggleBox('layerBox');
+            }
 
             
             
