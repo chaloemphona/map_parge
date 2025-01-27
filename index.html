@@ -168,6 +168,9 @@
             color: rgb(255, 94, 0);
             font-weight: bold;
         }
+        .req-button-bottom {
+            top: 160px; 
+        }
 
         
 
@@ -190,6 +193,17 @@
 
 
         <div id="tokenboxBox" class="token-box">
+            <form id="reqtokenForm">
+                <input 
+                type="text" 
+                id="username" 
+                name="username" 
+                value="" 
+                required   
+                style="width: 270px;"
+                placeholder="กรอก 'ชื่อ' เพื่อรับ 'โทเค็น' ">
+                <button type="submit" style="background-color: #007bff; color: rgb(255, 241, 241); border: none; padding: 5px 10px; border-radius: 5px;">ยืนยัน</button>
+            </form>
             <form id="tokenForm">
                 <label for="token_req"></label>
                 <input 
@@ -199,8 +213,8 @@
                     value="" 
                     required 
                     style="width: 270px;" 
-                    placeholder="กรอกโทเค็นที่นี่">
-                <button type="submit" style="background-color: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 5px;">ยืนยัน</button>
+                    placeholder="กรอก 'โทเค็น' ที่นี่">
+                <button type="submit" style="background-color: #007bff; color: rgb(255, 253, 241); border: none; padding: 5px 10px; border-radius: 5px;">ยืนยัน</button>
             </form>
         </div>
 
@@ -290,7 +304,7 @@
             }
         });
 
-        const BASE_URL = "https://4572-101-108-71-116.ngrok-free.app"; 
+        const BASE_URL = "http://192.168.10.166:8000"; 
         // //http://192.168.10.166:8000 //http://127.0.0.1:8000  //https://7a31-125-26-174-54.ngrok-free.app
 
 
@@ -878,7 +892,49 @@
 //--------------------------------------------------
 //--------------------------------------------------
 
+document.getElementById('reqtokenForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const submitButton = event.target.querySelector('button[type="submit"]');
+            try {
+                const response = await fetch(`${BASE_URL}/api/v1/token`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', },
+                    body: JSON.stringify({ username }),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+               
+                if (data.token) {
+                    const token = data.token;
+                    console.log(`Token: ${token}`);
 
+                const tokenLabel = document.querySelector('label[for="token_req"]');
+                const tokenInput = document.getElementById('token_req');
+                tokenInput.value = token;
+                if (tokenInput) {
+                    submitButton.textContent = "ยืนยันสำเร็จ";
+                    submitButton.style.backgroundColor = "green";
+                    submitButton.style.color = "white";
+                    submitButton.style.border = "none";
+                    submitButton.style.cursor = "default";
+                    submitButton.disabled = true;
+                } else {
+                    console.error("กรุณากรอก Token");
+                }
+
+                    document.getElementById('response_token').innerText = `Token: ${token}`;
+                    document.getElementById('callApi').disabled = false;
+                } else {
+                    document.getElementById('response_token').innerText = `Error: ${JSON.stringify(data)}`;
+                }
+            } catch (error) {
+                console.error(`Error requesting token: ${error.message}`);
+                document.getElementById('response_token').innerText = `Error requesting token: ${error.message}`;
+            }
+        });
 
 //--------------------------------------------------
 //--------------------------------------------------
