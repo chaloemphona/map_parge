@@ -171,6 +171,20 @@
         .req-button-bottom {
             top: 160px; 
         }
+        
+        .dynamic-tooltip {
+            position: absolute;
+            background: black;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 10px;
+            z-index: 1000;
+            white-space: nowrap;
+            opacity: 0.9;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
 
         
 
@@ -179,18 +193,21 @@
 <body>
     <div id="map">
 
-        <button class="layer-button layer-button-bottom" onclick="toggleLayerBox()">
-            <img src="https://cdn-icons-png.flaticon.com/128/1975/1975643.png" alt="Layer Box" style="width: 24px; height: 24px; vertical-align: middle;">
+        <button class="layer-button layer-button-bottom" onclick="toggleLayerBox()" 
+                onmouseenter="showTooltip(event, 'Data Box')">
+            <img src="https://cdn-icons-png.flaticon.com/128/1975/1975643.png" alt="Layer Box" style="width: 24px; height: 24px;">
         </button>
-        <button class="layer-button layer-button-top" onclick="toggleCheckboxBox()">
-            <img src="https://cdn-icons-png.flaticon.com/128/10042/10042921.png" alt="Toggle Markers" style="width: 24px; height: 24px; vertical-align: middle;">
+
+        <button class="layer-button layer-button-top" onclick="toggleCheckboxBox()" 
+                onmouseenter="showTooltip(event, 'Markers')">
+            <img src="https://cdn-icons-png.flaticon.com/128/10042/10042921.png" alt="Toggle Markers" style="width: 24px; height: 24px;">
         </button>
-        <button class="layer-button token-button-bottom" onclick="toggleTokenboxBox()">
-            <img src="https://cdn-icons-png.flaticon.com/128/17707/17707268.png" alt="Token Box" style="width: 24px; height: 24px; vertical-align: middle;">
+
+        <button class="layer-button token-button-bottom" onclick="toggleTokenboxBox()" 
+                onmouseenter="showTooltip(event, 'Token Box')">
+            <img src="https://cdn-icons-png.flaticon.com/128/17707/17707268.png" alt="Token Box" style="width: 24px; height: 24px;">
         </button>
         <!-- https://cdn-icons-png.flaticon.com/128/3861/3861399.png -->
-
-
 
         <div id="tokenboxBox" class="token-box">
             <form id="reqtokenForm">
@@ -221,8 +238,8 @@
         <div id="checkboxBox" class="checkbox-box">
             <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="KTMMarkerToggle(this.checked)">point กทม</label>
             <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="NaKhorMarkerToggle(this.checked)">point นครปฐม</label>
-            <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="H3HhandlePolygonToggle(this.checked)">ความหนสเเน่น POI</label>
-            <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="prakanMarkerToggle(this.checked)">point 2 เเสน +</label>
+            <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="prakanMarkerToggle(this.checked)">point เเสน +</label>
+            <label><input type="checkbox" id="toggleAccidentMarkersCheckbox" onchange="H3HhandlePolygonToggle(this.checked)">ความหนาเเน่น POI</label>
         </div>
         
         <div id="layerBox" class="layer-box">
@@ -241,8 +258,6 @@
             </div>
         </div>
     </div>
-
-
 
     <script>
         const map = new maplibregl.Map({
@@ -280,10 +295,6 @@
         //     }
         //consol.log 
 
-
-
-
-
         let token = ""; 
 
         document.getElementById("tokenForm").addEventListener("submit", function(event) {
@@ -304,10 +315,9 @@
             }
         });
 
-        const BASE_URL = "http://192.168.10.166:8000"; 
+        const BASE_URL = "https://fast-w9y8.onrender.com"; 
         // //http://192.168.10.166:8000 //http://127.0.0.1:8000  //https://7a31-125-26-174-54.ngrok-free.app
-
-
+        //https://fast-w9y8.onrender.com
             //point กทม 
             let KTMMarkersLayerId = "KTM-markers-layer";
             let KTMMarkersSourceId = "KTM-markers-source";
@@ -322,7 +332,7 @@
             }
 
             function fetchAndDisplayKTMMarkers() {
-                fetch(`${BASE_URL}/api/v1/duckDBs/places/th/region?region=bangkok`, {
+                fetch(`${BASE_URL}/api/v1/pgDBs/places/th?region=Bangkok`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${token}`,
@@ -682,7 +692,7 @@
             }
 
             function H3HPolygonsFetch() {
-                fetch(`${BASE_URL}/api/v1/duckDBs/places/th/region/hexagon`, {
+                fetch(`${BASE_URL}/api/v1/pgDBs/places/th/hexagon`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${token}`,
@@ -770,18 +780,7 @@
                 }
             }
 
-
-
-
-
-
-
-
-            
-
-
-
-
+        
             // รายละเอียด 
             function fetchMaxPointCount() {
                 if (!token) {
@@ -789,7 +788,7 @@
                     return;
                 }
 
-                fetch(`${BASE_URL}/api/v1/duckDBs/places/th/region/hexagon`, {
+                fetch(`${BASE_URL}/api/v1/pgDBs/places/th/hexagon`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${token}`,
@@ -938,8 +937,28 @@ document.getElementById('reqtokenForm').addEventListener('submit', async (event)
 
 //--------------------------------------------------
 //--------------------------------------------------
-
     </script>
+
+    <script>
+        function showTooltip(event, text) {
+        let button = event.currentTarget; // ดึงปุ่มที่ถูกชี้
+        let rect = button.getBoundingClientRect(); // หาตำแหน่งของปุ่ม
+        let tooltip = document.createElement("div");
+    
+        tooltip.className = "dynamic-tooltip";
+        tooltip.innerText = text;
+        document.body.appendChild(tooltip);
+    
+        // คำนวณตำแหน่งให้ tooltip แสดงด้านขวาของปุ่ม
+        tooltip.style.left = `${rect.right + window.scrollX + 5}px`;
+        tooltip.style.top = `${rect.top + window.scrollY + rect.height / 2 - tooltip.offsetHeight / 2}px`;
+    
+        button.onmouseleave = function () {
+            tooltip.remove();
+        };
+        }
+    </script>
+    
 </body>
 </html>
 
