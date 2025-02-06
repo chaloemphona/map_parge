@@ -449,7 +449,7 @@
             }
 
             function fetchAndDisplayNaKhorMarkers() {
-                fetch(`${BASE_URL}/api/v1/duckDBs/places/th/region?region=Nakhon Pathom`, {
+                fetch(`${BASE_URL}/api/v1/pgDBs/places/th?region=Nakhon Pathom`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${token}`,
@@ -569,7 +569,7 @@
             }
 
             function fetchAndDisplayprakanMarkers() {
-                fetch(`${BASE_URL}/api/v1/duckDBs/places/th/region?limit=260000`, {
+                fetch(`${BASE_URL}/api/v1/pgDBs/places/th?limit=6000`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${token}`,
