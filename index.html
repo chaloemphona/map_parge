@@ -5,6 +5,7 @@
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/128/9480/9480517.png" type="image/png">
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" />
     <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/polyline/0.2.0/polyline.min.js"></script>
     <style>
         #map {
             height: 700px;   
@@ -48,7 +49,7 @@
             position: absolute;
             top: 2px;
             left: 10px;
-            background-color: #ffc756;
+            background-color: #fec043;
             color: rgb(246, 239, 204);
             border: none;
             border-radius: 5px;
@@ -143,8 +144,8 @@
             padding: 10px; 
             display: none;  
             z-index: 1000;
-            backdrop-filter: blur(3px); /*blur(10px); จะเบลอมาก*/   /*blur(3px); จะเบลอน้อย*/
-            -webkit-backdrop-filter: blur(3px); /*blur(10px); จะเบลอมาก*/   /*blur(3px); จะเบลอน้อย*/
+            backdrop-filter: blur(3px); 
+            -webkit-backdrop-filter: blur(3px);
 
         }
 
@@ -162,6 +163,25 @@
             font-family: Arial, sans-serif; 
             font-size: 16px; 
         }
+        
+        #routeboxBox {
+            width: 350px;
+            height: 20px;
+            border: 1px solid #ffffff; 
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.3); 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+            padding: 10px;
+            display: flex; 
+            justify-content: center;  
+            align-items: center;    
+            color: #ff2200; 
+            font-family: Arial, sans-serif; 
+            text-align: center;
+            font-size: 16px; 
+            font-weight: bold;
+        }
+
 
         #dataMore span {
             font-size: 25px;
@@ -171,7 +191,7 @@
         .req-button-bottom {
             top: 160px; 
         }
-        
+
         .dynamic-tooltip {
             position: absolute;
             background: black;
@@ -186,8 +206,57 @@
             pointer-events: none;
         }
 
-        
+        .layer-button-Route {
+            top: 160px; 
+        }
 
+        .route-box {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 370px;
+            background-color: rgba(255, 255, 255, 0.1); 
+            border: 1px solid #ffffff; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+            padding: 10px;
+            display: none;
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+        }
+        .route-box.show {
+            display: block; 
+            left: 75;  
+        }
+        .route-box input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .route-box button {
+            padding: 10px;
+            margin-top: 10px;
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .route-box button:hover {
+            background-color: #45a049;
+        }
+        .route-box p strong {
+            font-weight: bold;
+            color: rgb(255, 94, 0); 
+            text-align: center;
+            font-size: 20px; 
+        }
     </style>
 </head>
 <body>
@@ -207,7 +276,11 @@
                 onmouseenter="showTooltip(event, 'Token Box')">
             <img src="https://cdn-icons-png.flaticon.com/128/17707/17707268.png" alt="Token Box" style="width: 24px; height: 24px;">
         </button>
-        <!-- https://cdn-icons-png.flaticon.com/128/3861/3861399.png -->
+        
+        <button class="layer-button layer-button-route" onclick="toggleRouteBox()" 
+                onmouseenter="showTooltip(event, 'Route Box')">
+            <img src="https://cdn-icons-png.flaticon.com/128/1581/1581899.png" alt="Route Box" style="width: 24px; height: 24px;">
+        </button>
 
         <div id="tokenboxBox" class="token-box">
             <form id="reqtokenForm">
@@ -257,6 +330,36 @@
                 </div>
             </div>
         </div>
+
+        
+        <div id="routeBox" class="route-box">
+            <p><strong> 
+                <img src="https://cdn-icons-png.flaticon.com/128/11370/11370649.png" alt="Token Box" style="width: 50px; height: 50px; vertical-align: middle;"> 
+                Route
+            </strong></p>
+            
+            <div id="routeboxBox">
+                <div id="distanceDisplay"></div>
+            </div>
+
+            <label for="startLat">Start Latitude:</label>
+            <input type="text" id="startLat" placeholder="Enter start latitude"><br>
+            <label for="startLon">Start Longitude:</label>
+            <input type="text" id="startLon" placeholder="Enter start longitude"><br>
+
+            <label for="endLat">End Latitude:</label>
+            <input type="text" id="endLat" placeholder="Enter end latitude"><br>
+            <label for="endLon">End Longitude:</label>
+            <input type="text" id="endLon" placeholder="Enter end longitude"><br>
+        
+            <label for="place_name">Shop Name (optional):</label>
+            <input type="text" id="place_name" placeholder="Enter shop name"><br>
+        
+            <button onclick="displayRoute()">Submit</button>
+            <button onclick="toggleRouteBox()">Close</button>
+        </div>
+
+        
     </div>
 
     <script>
@@ -781,6 +884,200 @@
                 }
             }
 
+
+
+
+
+
+
+        
+            // Polyline decoding function
+            function decodePolyline(encoded) {
+                let points = [];
+                let index = 0;
+                let lat = 0;
+                let lng = 0;
+
+                while (index < encoded.length) {
+                    let byte, shift = 0, result = 0;
+
+                    do {
+                        byte = encoded.charCodeAt(index++) - 63;
+                        result |= (byte & 0x1f) << shift;
+                        shift += 5;
+                    } while (byte >= 0x20);
+
+                    let deltaLat = (result & 1) ? ~(result >> 1) : (result >> 1);
+                    lat += deltaLat;
+
+                    shift = 0;
+                    result = 0;
+
+                    do {
+                        byte = encoded.charCodeAt(index++) - 63;
+                        result |= (byte & 0x1f) << shift;
+                        shift += 5;
+                    } while (byte >= 0x20);
+
+                    let deltaLng = (result & 1) ? ~(result >> 1) : (result >> 1);
+                    lng += deltaLng;
+
+                    points.push([lng / 1e5, lat / 1e5]);  // lng first, lat second
+                }
+
+                return points;
+            }
+
+
+
+            // Route กทม 
+            let routeLayerId = "route-layer";
+            let routeSourceId = "route-source";
+            let routeVisible = false;
+
+            function toggleRoute() {
+                routeVisible = !routeVisible;
+                const layer = map.getLayer(routeLayerId);
+                if (layer) {
+                    map.setLayoutProperty(routeLayerId, 'visibility', routeVisible ? 'visible' : 'none');
+                }
+            }
+
+            function displayRoute() {
+                const startLat = document.getElementById("startLat").value;
+                const startLon = document.getElementById("startLon").value;
+                const endLat = document.getElementById("endLat").value;
+                const endLon = document.getElementById("endLon").value;
+                const place_name = document.getElementById("place_name").value;
+
+                console.log("Route Start Location: ", startLat, startLon);
+                console.log("Route End Location: ", endLat, endLon);
+                console.log("Shop Name: ", place_name);
+
+                fetchAndDisplayRoute(startLat, startLon, endLat, endLon, place_name);
+            }
+
+            function fetchAndDisplayRoute(startLat, startLon, endLat, endLon, place_name) {
+                let url = `${BASE_URL}/api/v1/route_to_place?start_lat=${startLat}&start_lon=${startLon}`;
+                if (endLat && endLon) {
+                    url += `&end_lat=${endLat}&end_lon=${endLon}`;
+                } else if (place_name) {
+                    url += `&place_name=${encodeURIComponent(place_name)}`;
+                }
+
+                fetch(url, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Route Data:", data.route);
+                    console.log(`Distance: ${data.distance.kilometers} km (${data.distance.meters} m)`);
+
+                    // แสดงผลระยะทางใน HTML
+                    document.getElementById("distanceDisplay").innerHTML =
+                        `ระยะทาง: ${data.distance.kilometers} กิโลเมตร | ${data.distance.meters} เมตร`;
+
+                    if (data.status === "success" && data.route) {
+                        if (data.route.paths && data.route.paths[0].points) {
+                            const decodedRoute = decodePolyline(data.route.paths[0].points);
+
+                            const routeGeoJSON = {
+                                type: "FeatureCollection",
+                                features: [
+                                    {
+                                        type: "Feature",
+                                        geometry: {
+                                            type: "LineString",
+                                            coordinates: decodedRoute
+                                        },
+                                        properties: {}
+                                    }
+                                ]
+                            };
+
+                            if (map.getSource(routeSourceId)) {
+                                map.getSource(routeSourceId).setData(routeGeoJSON);
+                            } else {
+                                map.addSource(routeSourceId, {
+                                    type: "geojson",
+                                    data: routeGeoJSON
+                                });
+
+                                map.addLayer({
+                                    id: routeLayerId,
+                                    type: "line",
+                                    source: routeSourceId,
+                                    paint: {
+                                        "line-color": "#FF0000",
+                                        "line-width": 4,
+                                        "line-opacity": 0.7
+                                    },
+                                    layout: {
+                                        visibility: 'visible'
+                                    }
+                                });
+                            }
+                        } else {
+                            console.error("Polyline data is missing in the response.");
+                        }
+                    }
+                })
+                .catch(error => console.error('Error fetching route:', error));
+            }
+
+
+
+
+            function clearRoute() {
+                if (map.getLayer(routeLayerId)) {
+                    map.removeLayer(routeLayerId);
+                }
+                if (map.getSource(routeSourceId)) {
+                    map.removeSource(routeSourceId);
+                }
+            }
+
+            let routeBoxVisible = false;
+
+            function toggleRouteBox() {
+                routeBoxVisible = !routeBoxVisible;
+                const routeBox = document.getElementById("routeBox");
+
+                if (routeBoxVisible) {
+                    routeBox.style.display = "block";
+                } else {
+                    routeBox.style.display = "none";
+                }
+            }
+
+            function displayRoute() {
+                const startLat = document.getElementById("startLat").value;
+                const startLon = document.getElementById("startLon").value;
+                const endLat = document.getElementById("endLat").value;
+                const endLon = document.getElementById("endLon").value;
+                const place_name = document.getElementById("place_name").value;
+
+                console.log("Route Start Location: ", startLat, startLon);
+                console.log("Route End Location: ", endLat, endLon);
+                console.log("Shop Name: ", place_name);
+
+                fetchAndDisplayRoute(startLat, startLon, endLat, endLon); 
+            }
+
+
+
+
+        
+
         
             // รายละเอียด 
             function fetchMaxPointCount() {
@@ -863,9 +1160,8 @@
 
 
 
-            //การโขว์ layer Token Check Leayerdata เเละ การปิดเมื่อมีการเปิดอีกอัน
-            function toggleBox(boxId) {
-                const boxes = ['tokenboxBox', 'checkboxBox', 'layerBox']; 
+function toggleBox(boxId) {
+                const boxes = ['tokenboxBox', 'checkboxBox', 'layerBox', 'routeBox']; 
                 boxes.forEach(id => {
                     const box = document.getElementById(id);
                     if (id === boxId) {
@@ -883,6 +1179,9 @@
             }
             function toggleLayerBox() {
                 toggleBox('layerBox');
+            }
+            function toggleRouteBox() {
+                toggleBox('routeBox')
             }
 
             
